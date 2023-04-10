@@ -44,7 +44,7 @@
 ## 3.1 FFT Analysis
 - $T$: 시계열 데이터의 길이
 - $C$: 시계열 채널 수. univariate이면 $C = 1$이다
-- $\mathbf{X}_{\text{1D}} \in \mathbb{R}^{T \times C}$: 전체 시계열 데이터
+- $\mathbf{X}_ {\text{1D}} \in \mathbb{R}^{T \times C}$: 전체 시계열 데이터
 - $\text{FFT}(\cdot)$는 고속 푸리에 변환으로 주파수 $f_i$를 찾는다
 - $\text{Amp}(\cdot)$: 주파수 $f_i$의 진폭을 찾는 함수
 - $\text{Avg}(\cdot)$: $C$차원 시계열 데이터에 대하여 진폭의 평균 계산
@@ -52,48 +52,48 @@
 아래 일련의 과정을 거쳐 강도(indensity) $\mathbf{A}$를 얻습니다.
 
 
-$$ \mathbf{A} = \text{Avg}\Bigl( \text{Amp}(\text{FFT}(\mathbf{X}_{\text{1D}})) \Bigr), \quad \mathbf{A} \in \mathbb{R}^T $$
+$$ \mathbf{A} = \text{Avg}\Bigl( \text{Amp}(\text{FFT}(\mathbf{X}_ {\text{1D}})) \Bigr), \quad \mathbf{A} \in \mathbb{R}^T $$
 
 <p align="center">
 <img src='https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_FFT.png?raw=true' alt="FFT" width=60% title="FFT"></p>
 
-이때 $\mathbf{A}_j$는 주파수가 $j$(주기가 $\lceil T/j \rceil$이다.)의 intensity가 된다. 주파수 영역에서 의미없는 고주파는 noise이므로 이를 제거하기 위해 top-$k$의 진폭만 사용하기로 합니다. 
+이때 $\mathbf{A}_ j$는 주파수가 $j$(주기가 $\lceil T/j \rceil$이다.)의 intensity가 된다. 주파수 영역에서 의미없는 고주파는 noise이므로 이를 제거하기 위해 top-$k$의 진폭만 사용하기로 합니다. 
 $$\{ f_1, \cdots, f_k\} = \underset{f_* \in \{1, \cdots , [\frac{T}{2}]\}}{\text{argTopK}(\mathbf{A})}, \quad p_i = \Biggl\lceil\cfrac{T}{f_i} \Biggr\rceil, \quad i \in \{ 1, \cdots, k \}$$
 
-위 과정을 요약하면, $\mathbf{X}_{\text{1D}}$로부터 FFT를 이용하여 $k$개의 유의미한 진폭($\mathbf{A}$), 주파수($f_i$), 주기($p_i$)를 얻습니다.
-$$\mathbf{A}, \{f_1, \cdots, f_k\}, \{p_1, \cdots, p_k\} = \text{Period}(\mathbf{X}_{\text{1D}})$$
+위 과정을 요약하면, $\mathbf{X}_ {\text{1D}}$로부터 FFT를 이용하여 $k$개의 유의미한 진폭($\mathbf{A}$), 주파수($f_i$), 주기($p_i$)를 얻습니다.
+$$\mathbf{A}, \{f_1, \cdots, f_k\}, \{p_1, \cdots, p_k\} = \text{Period}(\mathbf{X}_ {\text{1D}})$$
 
 ![Transform 1D time series to 2D tensors](https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_convert2D.png?raw=true)
 
 ## 3.2 Reshape 1D time series to 2D tensors
-FFT로 얻은 $f$와 $p$를 이용하여 $\mathbf{X}_{\text{1D}}$로부터 $k$개의 2D-tensor $\mathbf{X}_{\text{2D}}$ 를 얻을 수 있습니다. 이때 $\text{Reshape}$ 결과가 $p_i \times f_i$ 모양이 되도록 zero-padding $\text{Padding}(\cdot)$이 필요합니다.
-$$\mathbf{X}_{\text{2D}}^i = \underset{p_i, f_i}{\text{Reshape}}(\text{Padding}(\mathbf{X}_{\text{1D}})), \quad i \in \set{1, \cdots, k}$$
+FFT로 얻은 $f$와 $p$를 이용하여 $\mathbf{X}_ {\text{1D}}$로부터 $k$개의 2D-tensor $\mathbf{X}_ {\text{2D}}$ 를 얻을 수 있습니다. 이때 $\text{Reshape}$ 결과가 $p_i \times f_i$ 모양이 되도록 zero-padding $\text{Padding}(\cdot)$이 필요합니다.
+$$\mathbf{X}_ {\text{2D}}^i = \underset{p_i, f_i}{\text{Reshape}}(\text{Padding}(\mathbf{X}_ {\text{1D}})), \quad i \in \set{1, \cdots, k}$$
 
 
 
 ## 3.3 TimesBlock
-TimesBlock 구조는 computer vision에서 자주 사용되는 ResNet의 residual way를 적용하였다. 먼저 raw data $\mathbf{X}_{\text{1D}} \in \mathbf{R}^{T \times C}$를 모델 차원에 맞게 임베딩하여 $\mathbf{X}_{\text{1D}}^0 \in \mathbb{R}^{T \times d_{\text{model}}}$를 얻게됩니다. 
-$$\mathbf{X}_{\text{1D}}^0 = \text{Embed}(\mathbf{X}_{\text{1D}})$$
-그 이후 $l$ 번째 layer마다 deep feature $\mathbf{X}_{\text{1D}}^{l}$를 구한다.
-$$\mathbf{X}_{\text{1D}}^l = \text{TimesBlock}(\mathbf{X}_{\text{1D}}^{l-1}) + \mathbf{X}_{\text{1D}}^{l-1}$$
+TimesBlock 구조는 computer vision에서 자주 사용되는 ResNet의 residual way를 적용하였다. 먼저 raw data $\mathbf{X}_ {\text{1D}} \in \mathbf{R}^{T \times C}$를 모델 차원에 맞게 임베딩하여 $\mathbf{X}_ {\text{1D}}^0 \in \mathbb{R}^{T \times d_{\text{model}}}$를 얻게됩니다. 
+$$\mathbf{X}_ {\text{1D}}^0 = \text{Embed}(\mathbf{X}_ {\text{1D}})$$
+그 이후 $l$ 번째 layer마다 deep feature $\mathbf{X}_ {\text{1D}}^{l}$를 구한다.
+$$\mathbf{X}_ {\text{1D}}^l = \text{TimesBlock}(\mathbf{X}_ {\text{1D}}^{l-1}) + \mathbf{X}_ {\text{1D}}^{l-1}$$
 TimesBlock은 크게 2가지 역할을 수행합니다. 
 1. 2D-variation 포착
 2. Adaptively aggregating representations
    
 **Capturing temporal 2D-variations**
 
-TimesNet은 $\text{Reshape}(\cdot)$로 변환한 2D-tensor를 multi-scale 2D kernel로 학습합니다. 이때 다양한 vision backbone을 이용할 수 있는데, 저자들은 parameter-efficient한 inception block을 사용했습니다. $\text{Inception}(\cdot)$을 통해 표현된 $\widehat{\mathbf{{X}}}_{\text{2D}}^{l, i}$은 다시 1D로 reshape하고 길이 $T$를 보존하도록 $\text{Trunc}(\cdot)$로 패딩을 제거합니다.
+TimesNet은 $\text{Reshape}(\cdot)$로 변환한 2D-tensor를 multi-scale 2D kernel로 학습합니다. 이때 다양한 vision backbone을 이용할 수 있는데, 저자들은 parameter-efficient한 inception block을 사용했습니다. $\text{Inception}(\cdot)$을 통해 표현된 $\widehat{\mathbf{{X}}}_ {\text{2D}}^{l, i}$은 다시 1D로 reshape하고 길이 $T$를 보존하도록 $\text{Trunc}(\cdot)$로 패딩을 제거합니다.
 
 $$
 \begin{align*}
-\mathbf{A}^{l-1}, \{ f_1, \cdots, f_k \}, \{ p_1, \cdots, p_k \} &= \text{Period}(\mathbf{X}_{\text{1D}}^{l-1}) \\
-\mathbf{X}_{\text{2D}}^i &= \underset{p_i, f_i}{\text{Reshape}}(\text{Padding}(\mathbf{X}_{\text{1D}})), \quad i \in \set{1, \cdots, k} \\
-\widehat{\mathbf{{X}}}_{\text{2D}}^{l, i} &= \text{Inception}(\mathbf{X}_{\text{2D}}^{l, i}), \quad i \in \set{1, \cdots, k} \\
-\widehat{\mathbf{{X}}}_{\text{1D}}^{l, i}& = \text{Trunc}(\underset{1, \  (p_i \times f_i)}{\text{Reshape}}(\widehat{\mathbf{{X}}}_{\text{2D}}^{l, i})), \quad i \in \{1, \cdots, k \} \\
+\mathbf{A}^{l-1}, \{ f_1, \cdots, f_k \}, \{ p_1, \cdots, p_k \} &= \text{Period}(\mathbf{X}_ {\text{1D}}^{l-1}) \\
+\mathbf{X}_ {\text{2D}}^i &= \underset{p_i, f_i}{\text{Reshape}}(\text{Padding}(\mathbf{X}_ {\text{1D}})), \quad i \in \set{1, \cdots, k} \\
+\widehat{\mathbf{{X}}}_ {\text{2D}}^{l, i} &= \text{Inception}(\mathbf{X}_ {\text{2D}}^{l, i}), \quad i \in \set{1, \cdots, k} \\
+\widehat{\mathbf{{X}}}_ {\text{1D}}^{l, i}& = \text{Trunc}(\underset{1, \  (p_i \times f_i)}{\text{Reshape}}(\widehat{\mathbf{{X}}}_ {\text{2D}}^{l, i})), \quad i \in \{1, \cdots, k \} \\
 \end{align*}
 $$
 
-각 $l$번째 layer를 통과한 후 $k$개의 1D-representation $\set{\widehat{\mathbf{X}}_{\text{1D}}^{l, 1}, \cdots, \widehat{\mathbf{X}}_{\text{1D}}^{l, k}}$을 얻습니다.
+각 $l$번째 layer를 통과한 후 $k$개의 1D-representation $\set{\widehat{\mathbf{X}}_ {\text{1D}}^{l, 1}, \cdots, \widehat{\mathbf{X}}_ {\text{1D}}^{l, k}}$을 얻습니다.
 
 <p align="center">
 <img src='https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_TimesBlock_1.png?raw=true' alt="TimesBlock" width=70% title="FFT"></p>
@@ -101,8 +101,8 @@ $$
 **Adaptive aggregateion**
 
 Autoformer 모델이 제안된 논문에서, Auto-Correlation은 진폭 $\mathbf{A}$는 선택된 주파수와 주기 $f, p$의 상대적 중요성을 반영한다는 사실을 알아냈습니다. 따라서 진폭을 기반으로 1D-representation을 집계합니다.
-$$\widehat{\mathbf{A}}_{f_1}^{l-1}, \cdots, \widehat{\mathbf{A}}_{f_k}^{l-1} = \text{Softmax}\left(\mathbf{A}_{f_1}^{l-1}, \cdots, \mathbf{A}_{f_k}^{l-1} \right)$$
-$$\mathbf{X}_{\text{1D}}^l = \sum_{i=1}^{k} \widehat{\mathbf{A}}_{f_i}^{l-1} \times \widehat{\mathbf{X}}_{\text{1D}}^{l, i}$$
+$$\widehat{\mathbf{A}}_ {f_1}^{l-1}, \cdots, \widehat{\mathbf{A}}_ {f_k}^{l-1} = \text{Softmax}\left(\mathbf{A}_ {f_1}^{l-1}, \cdots, \mathbf{A}_ {f_k}^{l-1} \right)$$
+$$\mathbf{X}_ {\text{1D}}^l = \sum_{i=1}^{k} \widehat{\mathbf{A}}_ {f_i}^{l-1} \times \widehat{\mathbf{X}}_ {\text{1D}}^{l, i}$$
 
 <p align="center">
 <img src='https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_TimesBlock_2.png?raw=true' alt="Aggregation" width=70% title="FFT"></p>
