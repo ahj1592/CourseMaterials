@@ -113,8 +113,8 @@ $\text{Inception}(\cdot)$을 통해 표현된 $\widehat{\mathbf{X}}_ {\text{2D}}
 **Adaptive aggregateion**
 
 Autoformer 모델이 제안된 논문에서, Auto-Correlation은 진폭 $\mathbf{A}$는 선택된 주파수와 주기 $f, p$의 상대적 중요성을 반영한다는 사실을 알아냈습니다. 따라서 진폭을 기반으로 1D-representation을 집계합니다.
-$\widehat{\mathbf{A}}_ {f_1}^{l-1}, \cdots, \widehat{\mathbf{A}}_ {f_k}^{l-1} = \text{Softmax}\left(\mathbf{A}_ {f_1}^{l-1}, \cdots, \mathbf{A}_ {f_k}^{l-1} \right)$
-$\mathbf{X}_ {\text{1D}}^l = \sum_{i=1}^{k} \widehat{\mathbf{A}}_ {f_i}^{l-1} \times \widehat{\mathbf{X}}_ {\text{1D}}^{l, i}$
+- $\widehat{\mathbf{A}}_ {f_1}^{l-1}, \cdots, \widehat{\mathbf{A}}_ {f_k}^{l-1} = \text{Softmax}\left(\mathbf{A}_ {f_1}^{l-1}, \cdots, \mathbf{A}_ {f_k}^{l-1} \right)$
+- $\mathbf{X}_ {\text{1D}}^l = \sum_{i=1}^{k} \widehat{\mathbf{A}}_ {f_i}^{l-1} \times \widehat{\mathbf{X}}_ {\text{1D}}^{l, i}$
 
 ![image](https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_TimesBlock_2.png?raw=true)
 
