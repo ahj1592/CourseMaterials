@@ -56,7 +56,7 @@ tags: [reviews]
 아래 일련의 과정을 거쳐 강도(indensity) $\mathbf{A}$를 얻습니다.
 
 
-\[ \mathbf{A} = \text{Avg}\Bigl( \text{Amp}(\text{FFT}(\mathbf{X}_ {\text{1D}})) \Bigr), \quad \mathbf{A} \in \mathbb{R}^T \]
+$\mathbf{A} = \text{Avg}\Bigl( \text{Amp}(\text{FFT}(\mathbf{X}_ {\text{1D}})) \Bigr), \quad \mathbf{A} \in \mathbb{R}^T$
 
 ![image](https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_FFT.png?raw=true)
 
@@ -93,14 +93,14 @@ TimesBlock은 크게 2가지 역할을 수행합니다.
 
 TimesNet은 $\text{Reshape}(\cdot)$로 변환한 2D-tensor를 multi-scale 2D kernel로 학습합니다. 이때 다양한 vision backbone을 이용할 수 있는데, 저자들은 parameter-efficient한 inception block을 사용했습니다. $\text{Inception}(\cdot)$을 통해 표현된 $\widehat{\mathbf{X}}_ {\text{2D}}^{l, i}$은 다시 1D로 reshape하고 길이 $T$를 보존하도록 $\text{Trunc}(\cdot)$로 패딩을 제거합니다.
 
-$
-\begin{align*}
+
+\begin{aligned}
 \mathbf{A}^{l-1}, \{ f_1, \cdots, f_k \}, \{ p_1, \cdots, p_k \} &= \text{Period}(\mathbf{X}_ {\text{1D}}^{l-1}) \\
 \mathbf{X}_ {\text{2D}}^i &= \underset{p_i, f_i}{\text{Reshape}}(\text{Padding}(\mathbf{X}_ {\text{1D}})), \quad i \in \{1, \cdots, k\} \\
 \widehat{\mathbf{X}}_ {\text{2D}}^{l, i} &= \text{Inception}(\mathbf{X}_ {\text{2D}}^{l, i}), \quad i \in \{1, \cdots, k\} \\
 \widehat{\mathbf{X}}_ {\text{1D}}^{l, i}& = \text{Trunc}(\underset{1, \  (p_i \times f_i)}{\text{Reshape}}(\widehat{\mathbf{X}}_ {\text{2D}}^{l, i})), \quad i \in \{1, \cdots, k \} \\
-\end{align*}
-$
+\end{aligned}
+
 
 각 $l$번째 layer를 통과한 후 $k$개의 1D-representation $\{\widehat{\mathbf{X}}_ {\text{1D}}^{l, 1}, \cdots, \widehat{\mathbf{X}}_ {\text{1D}}^{l, k}\}$을 얻습니다.
 
