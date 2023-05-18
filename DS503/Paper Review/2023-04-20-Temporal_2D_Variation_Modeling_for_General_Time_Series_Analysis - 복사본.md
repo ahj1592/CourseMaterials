@@ -56,16 +56,16 @@ tags: [reviews]
 아래 일련의 과정을 거쳐 강도(indensity) $\mathbf{A}$를 얻습니다.
 
 
-$\mathbf{A} = \text{Avg}\Bigl( \text{Amp}(\text{FFT}(\mathbf{X}_ {\text{1D}})) \Bigr), \quad \mathbf{A} \in \mathbb{R}^T$
+- $\mathbf{A} = \text{Avg}\Bigl( \text{Amp}(\text{FFT}(\mathbf{X}_ {\text{1D}})) \Bigr), \quad \mathbf{A} \in \mathbb{R}^T$
 
 ![image](https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_FFT.png?raw=true)
 
 
 이때 $\mathbf{A}_ j$는 주파수가 $j$(주기가 $\lceil T/j \rceil$이다.)의 intensity가 된다. 주파수 영역에서 의미없는 고주파는 noise이므로 이를 제거하기 위해 top-$k$의 진폭만 사용하기로 합니다. 
-$\{ f_1, \cdots, f_k\} = \underset{f_* \in \{1, \cdots , [\frac{T}{2}]\}}{\text{argTopK}(\mathbf{A})}, \quad p_i = \Biggl\lceil\cfrac{T}{f_i} \Biggr\rceil, \quad i \in \{ 1, \cdots, k \}$
+- $\{ f_1, \cdots, f_k\} = \underset{f_* \in \{1, \cdots , [\frac{T}{2}]\}}{\text{argTopK}(\mathbf{A})}, \quad p_i = \Biggl\lceil\cfrac{T}{f_i} \Biggr\rceil, \quad i \in \{ 1, \cdots, k \}$
 
 위 과정을 요약하면, $\mathbf{X}_ {\text{1D}}$로부터 FFT를 이용하여 $k$개의 유의미한 진폭($\mathbf{A}$), 주파수($f_i$), 주기($p_i$)를 얻습니다.
-$\mathbf{A}, \{f_1, \cdots, f_k\}, \{p_1, \cdots, p_k\} = \text{Period}(\mathbf{X}_ {\text{1D}})$
+- $\mathbf{A}, \{f_1, \cdots, f_k\}, \{p_1, \cdots, p_k\} = \text{Period}(\mathbf{X}_ {\text{1D}})$
 
 
 ![image](https://github.com/ahj1592/CourseMaterials/blob/main/DS503/Paper%20Review/images/TimesNet_convert2D.png?raw=true)
@@ -80,11 +80,13 @@ $\mathbf{X}_ {\text{2D}}^i = \underset{p_i, f_i}{\text{Reshape}}(\text{Padding}(
 
 
 ## 3.3 TimesBlock
-TimesBlock 구조는 computer vision에서 자주 사용되는 ResNet의 residual way를 적용하였다. 먼저 raw data $\mathbf{X}_ {\text{1D}} \in \mathbf{R}^{T \times C}$를 모델 차원에 맞게 임베딩하여 $\mathbf{X}_ {\text{1D}}^0 \in \mathbb{R}^{T \times d_{\text{model}}}$를 얻게됩니다. 
-$\mathbf{X}_ {\text{1D}}^0 = \text{Embed}(\mathbf{X}_ {\text{1D}})$
-그 이후 $l$ 번째 layer마다 deep feature $\mathbf{X}_ {\text{1D}}^{l}$를 구한다.
-$\mathbf{X}_ {\text{1D}}^l = \text{TimesBlock}(\mathbf{X}_ {\text{1D}}^{l-1}) + \mathbf{X}_ {\text{1D}}^{l-1}$
+TimesBlock 구조는 computer vision에서 자주 사용되는 ResNet의 residual way를 적용하였다. 먼저 raw data $\mathbf{X}_ {\text{1D}} \in  \mathbf{R}^{T \times C}$를 모델 차원에 맞게 임베딩하여 $\mathbf{X}_ {\text{1D}}^0 \in \mathbb{R}^{T \times d_{\text{model}}}$를 얻게됩니다.
 
+- $\mathbf{X}_ {\text{1D}}^0 = \text{Embed}(\mathbf{X}_ {\text{1D}}). \quad \mathbf{X}_ {\text{1D}} \in  \mathbf{R}^{T \times C}, \ \mathbf{X}_ {\text{1D}}^0 \in \mathbb{R}^{T \times d_{\text{model}}}$
+
+그 이후 $l$ 번째 layer마다 deep feature $\mathbf{X}_ {\text{1D}}^{l}$를 구한다.
+
+- $\mathbf{X}_ {\text{1D}}^l = \text{TimesBlock}(\mathbf{X}_ {\text{1D}}^{l-1}) + \mathbf{X}_ {\text{1D}}^{l-1}$
 TimesBlock은 크게 2가지 역할을 수행합니다. 
 1. 2D-variation 포착
 2. Adaptively aggregating representations
